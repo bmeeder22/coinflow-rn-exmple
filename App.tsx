@@ -55,7 +55,7 @@ function App(): JSX.Element {
         merchantId={'paysafe'}
         connection={connection}
         blockchain={'solana'}
-        env={'local'}
+        env={'staging'}
       />
     </View>
   );
