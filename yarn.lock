@@ -1156,10 +1156,10 @@
   "resolved" "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   "version" "0.2.3"
 
-"@coinflowlabs/react-native@file:../../projects/coinflow-release/external/react-native/coinflowlabs-react-native-1.2.0-sandbox2.tgz":
-  "integrity" "sha512-P5Un+iYVX+zRwNkSWZXz/0KzYBbtFLqVjXKVLUFNOE1lug+6ARRVNwDHnKbwU4ZDl8fbmoZiV5yFLvN84KVR8A=="
-  "resolved" "file:../../projects/coinflow-release/external/react-native/coinflowlabs-react-native-1.2.0-sandbox2.tgz"
-  "version" "1.2.0-sandbox2"
+"@coinflowlabs/react-native@1.2.1":
+  "integrity" "sha512-alcLeA8CzL1NxSO2oTxW5GQ89Uaay9F5e28E01ySOWf+O4aCnzuStF0kfxYk/s3+RGZfbpHb86+QkTEm6HYYEw=="
+  "resolved" "https://registry.npmjs.org/@coinflowlabs/react-native/-/react-native-1.2.1.tgz"
+  "version" "1.2.1"
   dependencies:
     "@solana/web3.js" "^1.75.0"
     "bn.js" "^5.2.1"
