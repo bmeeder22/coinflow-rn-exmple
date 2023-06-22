@@ -6,9 +6,21 @@
  */
 
 import React, {useMemo} from 'react';
-import {StyleSheet, View, Dimensions, Text} from 'react-native';
-import {Keypair, Connection, Transaction} from '@solana/web3.js';
+
+// Import the crypto getRandomValues shim (**BEFORE** the shims)
+import 'react-native-get-random-values';
+
+// Import the the ethers shims (**BEFORE** ethers)
+import '@ethersproject/shims';
+
+// Import the ethers library
+import {ethers} from 'ethers';
+
+import {Dimensions, StyleSheet, Text, View} from 'react-native';
+import {Connection, Keypair, Transaction} from '@solana/web3.js';
 import {CoinflowWithdraw} from '@coinflowlabs/react-native';
+
+export type EvmTransaction = ethers.providers.TransactionRequest & {to: string};
 
 // Cq5FCrMeQcp31qBtqjyQW31gWHhUGBndqAztcw4GjuPv
 const secretKey = Keypair.fromSecretKey(
@@ -20,6 +32,7 @@ const secretKey = Keypair.fromSecretKey(
   ]),
 );
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const SolanaWallet = {
   publicKey: secretKey.publicKey.toString(),
   sendTransaction: async (transaction: Transaction) => {
@@ -37,24 +50,53 @@ const SolanaWallet = {
       throw e;
     }
   },
+  signTransaction: async (transaction: Transaction) => {
+    transaction.partialSign(secretKey);
+    return transaction;
+  },
+};
+
+const evmPrivateKey =
+  '0xacaf85ea26202ba8a6b5ef7a20fa0a6db3c3c6488afeba878805b1de88d6e181';
+const EvmWallet = {
+  address: new ethers.Wallet(evmPrivateKey).address,
+  sendTransaction: async (tx: EvmTransaction) => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://rpc.ankr.com/polygon_mumbai',
+    );
+    const wallet = new ethers.Wallet(evmPrivateKey, provider);
+    const response = await wallet.sendTransaction(tx);
+    const hash = response.hash;
+    return {hash};
+  },
+  signMessage: async (message: string) => {
+    const typedData = JSON.parse(message);
+    const signature = await new ethers.Wallet(evmPrivateKey)._signTypedData(
+      typedData.domain,
+      {
+        [typedData.primaryType]: typedData.types[typedData.primaryType],
+      },
+      typedData.message,
+    );
+    return signature;
+  },
 };
 
 function App(): JSX.Element {
-  const wallet = useMemo(() => SolanaWallet, []);
-  const connection = useMemo(
-    () => new Connection('https://api.devnet.solana.com', 'confirmed'),
-    [],
-  );
+  const wallet = useMemo(() => EvmWallet, []);
+  // const connection = useMemo(
+  //   () => new Connection('https://api.devnet.solana.com', 'confirmed'),
+  //   [],
+  // );
 
   return (
     <View style={styles.container}>
-      <Text>Public key: {wallet.publicKey.toString()}</Text>
+      <Text>Public key: {wallet.address}</Text>
       <CoinflowWithdraw
         style={styles.video}
         wallet={wallet}
         merchantId={'paysafe'}
-        connection={connection}
-        blockchain={'solana'}
+        blockchain={'polygon'}
         env={'staging'}
       />
     </View>
