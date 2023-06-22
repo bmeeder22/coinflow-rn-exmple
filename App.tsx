@@ -7,10 +7,10 @@
 
 import React, {useMemo} from 'react';
 import {StyleSheet, View, Dimensions, Text} from 'react-native';
-import {Keypair, Connection, PublicKey, Transaction} from '@solana/web3.js';
+import {Keypair, Connection, Transaction} from '@solana/web3.js';
 import {CoinflowWithdraw} from '@coinflowlabs/react-native';
 
-const publicKey = new PublicKey('Cq5FCrMeQcp31qBtqjyQW31gWHhUGBndqAztcw4GjuPv');
+// Cq5FCrMeQcp31qBtqjyQW31gWHhUGBndqAztcw4GjuPv
 const secretKey = Keypair.fromSecretKey(
   new Uint8Array([
     207, 103, 107, 219, 221, 87, 59, 118, 71, 106, 157, 181, 230, 45, 44, 205,
@@ -20,38 +20,38 @@ const secretKey = Keypair.fromSecretKey(
   ]),
 );
 
-function App(): JSX.Element {
-  const connection = useMemo(
-    () => new Connection('https://api.devnet.solana.com', 'confirmed'),
-    [],
-  );
-
-  const sendTransaction = async (transaction: Transaction) => {
+const SolanaWallet = {
+  publicKey: secretKey.publicKey.toString(),
+  sendTransaction: async (transaction: Transaction) => {
     try {
-      console.log('sendTransaction');
       transaction.partialSign(secretKey);
       const serializedTransaction = transaction.serialize();
-      const signature = await connection.sendRawTransaction(
-        serializedTransaction,
-      );
-      console.log({signature});
+      const signature = await new Connection(
+        'https://api.devnet.solana.com',
+        'confirmed',
+      ).sendRawTransaction(serializedTransaction);
       return signature;
     } catch (e) {
       console.error('!!!!!sendTransaction catch!!!!!!');
       console.error(e);
       throw e;
     }
-  };
+  },
+};
+
+function App(): JSX.Element {
+  const wallet = useMemo(() => SolanaWallet, []);
+  const connection = useMemo(
+    () => new Connection('https://api.devnet.solana.com', 'confirmed'),
+    [],
+  );
 
   return (
     <View style={styles.container}>
-      <Text>Public key: {publicKey?.toString()}</Text>
+      <Text>Public key: {wallet.publicKey.toString()}</Text>
       <CoinflowWithdraw
         style={styles.video}
-        wallet={{
-          publicKey,
-          sendTransaction,
-        }}
+        wallet={wallet}
         merchantId={'paysafe'}
         connection={connection}
         blockchain={'solana'}
@@ -78,17 +78,6 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
-  // container: {
-  //   borderStyle: 'solid',
-  //   borderWidth: 2,
-  //   borderColor: 'red',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   paddingTop: 50,
-  //   paddingBottom: 30,
-  //   width: Dimensions.get('window').width,
-  //   height: Dimensions.get('window').height,
-  // },
   container: {
     flex: 1,
     alignItems: 'center',
